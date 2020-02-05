@@ -1,0 +1,197 @@
+#include "DisplayObject.h"
+#include <string>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include "Game.h"
+#include <iostream>
+#include <algorithm>
+
+DisplayObject::DisplayObject(){
+	image = NULL;
+	texture = NULL;
+	curTexture = NULL;
+	//position = {0, 0};
+}
+
+DisplayObject::DisplayObject(string id, string filepath){
+	this->id = id;
+	this->imgPath = filepath;
+
+	loadTexture(filepath);
+}
+
+DisplayObject::DisplayObject(string id, int red, int green, int blue){
+	isRGB = true;
+	this->id = id;
+
+	this->red = red;
+	this->blue = blue;
+	this->green = green;
+
+	this->loadRGBTexture(red, green, blue);
+}
+
+DisplayObject::~DisplayObject(){
+	//TODO: Get this freeing working
+	if(image != NULL) SDL_FreeSurface(image);
+	if(texture != NULL) SDL_DestroyTexture(texture);
+
+}
+
+void DisplayObject::loadTexture(string filepath){
+	image = IMG_Load(filepath.c_str());
+	texture = SDL_CreateTextureFromSurface(Game::renderer, image);
+	setTexture(texture);
+}
+
+void DisplayObject::loadRGBTexture(int red, int green, int blue){
+	image = SDL_CreateRGBSurface(0, 100, 100, 32, 0, 0, 0, 0x000000ff);
+	SDL_FillRect(image, NULL, SDL_MapRGB(image->format, red, green, blue));
+	texture = SDL_CreateTextureFromSurface(Game::renderer, image);
+	SDL_SetTextureBlendMode( texture, SDL_BLENDMODE_BLEND );
+	setTexture(texture);
+}
+
+void DisplayObject::setTexture(SDL_Texture* t){
+	this->curTexture = t;
+}
+
+void DisplayObject::update(set<SDL_Scancode> pressedKeys){
+	AffineTransform at;
+	int tx = 0;
+	int ty = 0;
+	int sx = 0;
+	int sy = 0;
+	int r = 0;
+	for (auto k : pressedKeys){
+		switch (k) {
+			case SDL_SCANCODE_UP:
+				//at.translate(0,-1 - scaleY);
+				ty--;
+				break;
+			case SDL_SCANCODE_DOWN:
+				//at.translate(0,1 + scaleY);
+				ty++;
+				break;
+			case SDL_SCANCODE_LEFT:
+				//at.translate(-1 - scaleX,0);
+				tx--;
+				break;
+			case SDL_SCANCODE_RIGHT:
+				//at.translate(1 + scaleX,0);
+				ty++;
+				break;
+			case SDL_SCANCODE_Q:
+				//at.translate(-pivot.x, -pivot.y);
+				//at.scale(0.95,0.95);
+				//at.translate(pivot.x, pivot.y);
+				sx = 0.95;
+				sy = 0.95;
+				break;
+			case SDL_SCANCODE_W:
+				//at.translate(-pivot.x, -pivot.y);
+				//at.scale(1.05,1.05);
+				//at.translate(pivot.x, pivot.y);
+				sx = 1.05;
+				sy = 1.05;
+				break;
+			//Rotates not fully functional, will finish soon
+			case SDL_SCANCODE_A:
+				//at.rotate(-0.05);
+				//rotation--;
+				r = -0.05;
+				break;
+			case SDL_SCANCODE_S:
+				//at.rotate(0.05);
+				//rotation++;
+				r = 0.05;
+				break;
+			case SDL_SCANCODE_I:
+				pivot.y--;
+				break;
+			case SDL_SCANCODE_J:
+				pivot.x--;
+				break;
+			case SDL_SCANCODE_K:
+				pivot.y++;
+				break;
+			case SDL_SCANCODE_L:
+				pivot.x++;
+				break;
+			case SDL_SCANCODE_P:
+				if (!p_pressed){
+					vis = !vis;
+					p_pressed = true;
+				}
+				break;
+			case SDL_SCANCODE_Z:
+				if (alpha > 0)
+					alpha--;
+				break;
+			case SDL_SCANCODE_X:
+				if (alpha < 255)
+					alpha++;
+				break;
+		}
+	}
+	if (pressedKeys.find(SDL_SCANCODE_P) == pressedKeys.end()){
+		p_pressed = false;
+	}
+	pivot.x += tx;
+	pivot.y += ty;
+	at.scale(sx, sy);
+	at.rotate(r);
+	at.translate(tx, ty);
+	this->draw(at);
+}
+
+void DisplayObject::draw(AffineTransform &at){
+
+	if(curTexture != NULL){
+		double rads = rotation*3.1415/180;
+		SDL_Point locPos = at.transformPoint(this->position.x, this->position.y);
+		SDL_Point locToR = at.transformPoint(this->position.x+cos(rads)*(image->w*scaleX), this->position.y+sin(rads)*(image->w*scaleX));
+		SDL_Point locPiv = at.transformPoint(this->pivot.x, this->pivot.y);
+		//applyTransformations(at);
+		SDL_Rect dstrect = { locPos.x, locPos.y, image->w*scaleX, image->h*scaleY};
+		this->position.x = locPos.x;
+		this->position.y = locPos.y;
+		this->pivot.x = locPiv.x;
+		this->pivot.y = locPiv.y;
+		this->scaleX *= at.getScaleX();
+		this->scaleY *= at.getScaleY();
+
+		//std::cout << "ScaleX: " << scaleX << ", ScaleY: " << scaleY << std::endl;
+		SDL_Point cent = {locPiv.x - locPos.x, locPiv.y - locPos.y};
+		//std::cout << "Pivot: " << pivot.x << ", " << pivot.y << std::endl;
+		this->rotation = calcRotation(locPos, locToR);
+
+		if (this->vis)
+			SDL_SetTextureAlphaMod(curTexture, alpha);
+		else
+			SDL_SetTextureAlphaMod(curTexture, 0);
+		SDL_RenderCopyEx(Game::renderer, curTexture, NULL, &dstrect, this->rotation, &cent, SDL_FLIP_NONE);
+	}
+}
+
+void DisplayObject::processInput(SDL_Scancode pressedKey){
+
+}
+
+double DisplayObject::dist(SDL_Point &a, SDL_Point &b){
+	return sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
+}
+
+void DisplayObject::applyTransformations(AffineTransform &at){
+
+}
+
+void DisplayObject::reverseTransformations(AffineTransform &at){
+
+}
+
+double DisplayObject::calcRotation(SDL_Point &left, SDL_Point &right){
+	double rads = atan2(right.y - left.y, right.x - left.x);
+	double deg = rads*180/3.1415;
+	return deg;
+}
