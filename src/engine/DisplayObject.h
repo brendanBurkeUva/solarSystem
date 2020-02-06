@@ -55,6 +55,10 @@ public:
 	void applyTransformations(AffineTransform &at);
 	void reverseTransformations(AffineTransform &at);
 	double calcRotation(SDL_Point &left, SDL_Point &right);
+
+	virtual void rotate(int deg);
+	virtual void move(int tx, int ty);
+	virtual void scale(double sx, double sy);
 private:
 
 	SDL_Texture* texture = NULL;

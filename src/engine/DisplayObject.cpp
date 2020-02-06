@@ -58,68 +58,6 @@ void DisplayObject::setTexture(SDL_Texture* t){
 }
 
 void DisplayObject::update(set<SDL_Scancode> pressedKeys){
-	//for (auto k : pressedKeys){
-	//	switch (k) {
-	//		case SDL_SCANCODE_UP:
-	//			y += -1 - scaleY;
-	//			break;
-	//		case SDL_SCANCODE_DOWN:
-	//			y += 1 + scaleY;
-	//			break;
-	//		case SDL_SCANCODE_LEFT:
-	//			x += -1 - scaleX;
-	//			break;
-	//		case SDL_SCANCODE_RIGHT:
-	//			x += 1 + scaleX;
-	//			break;
-	//		case SDL_SCANCODE_Q:
-	//			scaleX *= 0.95;
-	//			scaleY *= 0.95;
-	//			break;
-	//		case SDL_SCANCODE_W:
-	//			scaleX *= 1.05;
-	//			scaleY *= 1.05;
-	//			break;
-	//		//Rotates not fully functional, will finish soon
-	//		case SDL_SCANCODE_A:
-	//			//at.rotate(-0.05);
-	//			rotation--;
-	//			break;
-	//		case SDL_SCANCODE_S:
-	//			//at.rotate(0.05);
-	//			rotation++;
-	//			break;
-	//		case SDL_SCANCODE_I:
-	//			pivotY--;
-	//			break;
-	//		case SDL_SCANCODE_J:
-	//			pivotX--;
-	//			break;
-	//		case SDL_SCANCODE_K:
-	//			pivotY++;
-	//			break;
-	//		case SDL_SCANCODE_L:
-	//			pivotX++;
-	//			break;
-	//		case SDL_SCANCODE_P:
-	//			if (!p_pressed){
-	//				vis = !vis;
-	//				p_pressed = true;
-	//			}
-	//			break;
-	//		case SDL_SCANCODE_Z:
-	//			if (alpha > 0)
-	//				alpha--;
-	//			break;
-	//		case SDL_SCANCODE_X:
-	//			if (alpha < 255)
-	//				alpha++;
-	//			break;
-	//	}
-	//}
-	//if (pressedKeys.find(SDL_SCANCODE_P) == pressedKeys.end()){
-	//	p_pressed = false;
-	//}
 }
 
 void DisplayObject::draw(AffineTransform &at){
@@ -127,9 +65,6 @@ void DisplayObject::draw(AffineTransform &at){
 	if(curTexture != NULL && this->vis){
 		//apply transforms to move into position. Adjust for pivot after that.
 		applyTransformations(at);
-		at.translate(-pivotX, -pivotY);
-		//std::cout << "Pos: " << x << ", " << y << std::endl;
-		//std::cout << "Piv: " << pivotX << ", " << pivotY << std::endl;
 		//transform three points of interest. Corners except for bottom left (don't need it)
 		SDL_Point origin = at.transformPoint(0,0);
 		SDL_Point uRight = at.transformPoint(width, 0);
@@ -148,7 +83,6 @@ void DisplayObject::draw(AffineTransform &at){
 		SDL_RenderCopyEx(Game::renderer, curTexture, NULL, &dstrect, calcRotation(origin, uRight), &pivot, SDL_FLIP_NONE);
 
 		//undo pivot and all the other transformations
-		at.translate(pivotX, pivotY);
 		reverseTransformations(at);
 	}
 }
@@ -166,9 +100,11 @@ void DisplayObject::applyTransformations(AffineTransform &at){
 	at.translate(x,y);
 	at.rotate(rotation*(PI / 180.0));
 	at.scale(scaleX, scaleY);
+	at.translate(-pivotX, -pivotY);
 }
 
 void DisplayObject::reverseTransformations(AffineTransform &at){
+	at.translate(pivotX, pivotY);
 	at.scale(1.0/scaleX, 1.0/scaleY);
 	at.rotate(-(rotation*(PI / 180.0)));
 	at.translate(-x,-y);
@@ -178,4 +114,18 @@ double DisplayObject::calcRotation(SDL_Point &left, SDL_Point &right){
 	double rads = atan2(right.y - left.y, right.x - left.x);
 	double deg = rads*180/3.1415;
 	return deg;
+}
+
+void DisplayObject::rotate(int deg){
+	rotation += deg;
+}
+
+void DisplayObject::move(int tx, int ty){
+	x += tx;
+	y += ty;
+}
+
+void DisplayObject::scale(double sx, double sy){
+	scaleX *= sx;
+	scaleY *= sy;
 }

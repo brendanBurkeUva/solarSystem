@@ -4,16 +4,25 @@
 #include "Sprite.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <vector>
 
 using namespace std;
+typedef struct{
+	string path;
+	string name;
+	int frames;
+	int framerate;
+	bool loop;
+}Animation;
 
 class AnimatedSprite : public Sprite{
 
 public:
-	
+
 	AnimatedSprite();
 	AnimatedSprite(string id);
 	~AnimatedSprite();
+
 
 	void addAnimation(string basepath, string animName, int numFrames, int frameRate, bool loop);
 	Animation* getAnimation(string animName);
@@ -26,9 +35,10 @@ public:
 	virtual void draw(AffineTransform &at);
 
 	bool playing = false;
+	vector<Animation*> animations;
 
 private:
-	
+
 };
 
 #endif

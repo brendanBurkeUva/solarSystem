@@ -24,6 +24,9 @@ public:
 	void removeImmediateChild(string id);
 	void removeChild(int index);
 	void removeThis();
+	virtual void rotate(int deg);
+	virtual void move(int tx, int ty);
+	virtual void scale(double sx, double sy);
 
 	virtual int numChildren();
 	virtual DisplayObject* getChild(int index);
