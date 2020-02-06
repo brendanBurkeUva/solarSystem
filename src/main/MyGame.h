@@ -21,7 +21,7 @@ public:
 	virtual void draw(AffineTransform &at);
 
 private:
-	DisplayObjectContainer* sun;
+	AnimatedSprite* sun;
 	//AnimatedSprite* ani;
 };
 

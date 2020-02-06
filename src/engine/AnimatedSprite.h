@@ -36,7 +36,9 @@ public:
 	virtual void draw(AffineTransform &at);
 
 	bool playing = false;
-	vector<Animation*> animations;
+	int fram = 0;
+	Animation* cur = NULL;
+	vector<Animation> animations;
 
 	virtual void rotate(int deg);
 	virtual void move(int tx, int ty);

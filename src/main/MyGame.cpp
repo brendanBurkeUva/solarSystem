@@ -9,7 +9,10 @@
 using namespace std;
 
 MyGame::MyGame() : Game(1200, 1000){
-	sun = new DisplayObjectContainer("sun","./resources/character/sun1.png");
+	sun = new AnimatedSprite("sun"/*,"./resources/character/sun1.png"*/);
+	sun->addAnimation("./resources/character/sun", "sun", 3, 20, true);
+	sun->addAnimation("./resources/sinistar/sinistar", "star", 5, 15, true);
+	sun->play("sun");
 	sun->x = 550;
 	sun->y = 400;
 	sun->pivotX = sun->width/2;
@@ -53,6 +56,7 @@ MyGame::~MyGame(){
 
 void MyGame::update(set<SDL_Scancode> pressedKeys){
 	Game::update(pressedKeys);
+	sun->update(pressedKeys);
 	sun->rotate(1);
 	sun->children[0]->rotate(1);
 	sun->children[1]->rotate(5);
@@ -84,15 +88,17 @@ void MyGame::update(set<SDL_Scancode> pressedKeys){
 				sun->rotate(2);
 				break;
 			case SDL_SCANCODE_P:
-				sun->loadTexture("./resources/character/Sinistar.png");
-				sun->imgPath = "./resources/character/Sinistar.png";
+				if (sun->cur->name != "star")
+					sun->play("star");
+				//sun->imgPath = "./resources/character/Sinistar.png";
 				p = true;
 				break;
 		}
 	}
-	if (!p && sun->imgPath != "./resources/character/sun1.png"){
-		sun->imgPath = "./resources/character/sun1.png";
-		sun->loadTexture("./resources/character/sun1.png");
+	if (!p && sun->cur->name != "sun"){
+		sun->play("sun");
+		//sun->imgPath = "./resources/character/sun1.png";
+		//sun->loadTexture("./resources/character/sun1.png");
 	}
 	sun->children[0]->x = 250 + 100*cos(2*sun->rotation*PI/180.0);
 	sun->children[1]->x = 100 + 40*cos(2*sun->rotation*PI/180.0);
