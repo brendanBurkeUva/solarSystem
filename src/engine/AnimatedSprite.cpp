@@ -1,4 +1,5 @@
 #include "AnimatedSprite.h"
+#include <string>
 
 using namespace std;
 
@@ -29,10 +30,38 @@ Animation* AnimatedSprite::getAnimation(string animName){
   return NULL;
 }
 
+void AnimatedSprite::play(string animName){
+  Animation * a = getAnimation(animName);
+  while (playing){
+    int i = 0;
+    string fil = a->path;
+    if (i % a->framerate == 0) i = (i + 1)%a->framerate;
+    fil += to_string(i) + ".png";
+    loadTexture(fil);
+  }
+}
+
 void AnimatedSprite::update(set<SDL_Scancode> pressedKeys){
 
 }
 
 void AnimatedSprite::draw(AffineTransform &at){
+  Sprite::draw(at);
+}
 
+void AnimatedSprite::rotate(int deg){
+  rotation += deg;
+  for (auto kid : children){
+    kid->rotate(deg);
+  }
+}
+
+void AnimatedSprite::move(int tx, int ty){
+  x += tx;
+  y += ty;
+}
+
+void AnimatedSprite::scale(double sx, double sy){
+  scaleX *= sx;
+  scaleY *= sy;
 }

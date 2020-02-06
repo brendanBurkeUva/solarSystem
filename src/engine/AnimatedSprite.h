@@ -7,6 +7,7 @@
 #include <vector>
 
 using namespace std;
+
 typedef struct{
 	string path;
 	string name;
@@ -36,6 +37,10 @@ public:
 
 	bool playing = false;
 	vector<Animation*> animations;
+
+	virtual void rotate(int deg);
+	virtual void move(int tx, int ty);
+	virtual void scale(double sx, double sy);
 
 private:
 

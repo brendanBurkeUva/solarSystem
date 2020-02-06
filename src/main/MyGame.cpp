@@ -25,8 +25,8 @@ MyGame::MyGame() : Game(1200, 1000){
 	sun->addChild(earth);
 	sun->children[0]->x = 250;
 	sun->children[0]->y = 250;
-	sun->children[0]->pivotX = 50;
-	sun->children[0]->pivotY = 50;
+	sun->children[0]->pivotX = 650;
+	sun->children[0]->pivotY = 500;
 	sun->children[0]->scaleX = .75;
 	sun->children[0]->scaleY = .75;
 	DisplayObjectContainer * venus = new DisplayObjectContainer("venus","./resources/character/venus.png");
@@ -44,7 +44,6 @@ MyGame::MyGame() : Game(1200, 1000){
 	sun->children[1]->pivotY = 50;
 	sun->children[1]->scaleX = .5;
 	sun->children[1]->scaleY = .5;
-	//ani = new AnimatedSprite();
 }
 
 MyGame::~MyGame(){
@@ -86,13 +85,17 @@ void MyGame::update(set<SDL_Scancode> pressedKeys){
 				break;
 			case SDL_SCANCODE_P:
 				sun->loadTexture("./resources/character/Sinistar.png");
+				sun->imgPath = "./resources/character/Sinistar.png";
 				p = true;
 				break;
 		}
 	}
-	if (!p){
+	if (!p && sun->imgPath != "./resources/character/sun1.png"){
+		sun->imgPath = "./resources/character/sun1.png";
 		sun->loadTexture("./resources/character/sun1.png");
 	}
+	sun->children[0]->x = 250 + 100*cos(2*sun->rotation*PI/180.0);
+	sun->children[1]->x = 100 + 40*cos(2*sun->rotation*PI/180.0);
 }
 
 void MyGame::draw(AffineTransform &at){
