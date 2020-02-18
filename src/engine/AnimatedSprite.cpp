@@ -57,7 +57,7 @@ void AnimatedSprite::update(set<SDL_Scancode> pressedKeys){
     }
     fil += to_string(1+(fram/cur->framerate)%cur->frames) + ".png";
     //cout << fil << endl;
-    loadTexture(fil);
+    switchTexture(fil);
   }
 }
 

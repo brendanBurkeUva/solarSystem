@@ -45,6 +45,14 @@ void DisplayObject::loadTexture(string filepath){
 	setTexture(texture);
 }
 
+void DisplayObject::switchTexture(string filepath){
+	if(image != NULL) SDL_FreeSurface(image);
+	if(texture != NULL) SDL_DestroyTexture(texture);
+	image = IMG_Load(filepath.c_str());
+	texture = SDL_CreateTextureFromSurface(Game::renderer, image);
+	setTexture(texture);
+}
+
 void DisplayObject::loadRGBTexture(int red, int green, int blue){
 	image = SDL_CreateRGBSurface(0, 100, 100, 32, 0, 0, 0, 0x000000ff);
 	SDL_FillRect(image, NULL, SDL_MapRGB(image->format, red, green, blue));
